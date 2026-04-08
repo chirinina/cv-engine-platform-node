@@ -1,4 +1,21 @@
 const { Portfolio, PortfolioSection } = require("../models");
+const fs = require('fs');
+const path = require('path');
+
+const deleteUnusedImage = (oldUrl, newUrlsToKeep = []) => {
+  if (oldUrl && oldUrl.startsWith('/uploads/')) {
+    if (!newUrlsToKeep.includes(oldUrl)) {
+      const filePath = path.join(__dirname, '..', oldUrl);
+      if (fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (e) {
+          console.error("Error deleting old image:", filePath, e);
+        }
+      }
+    }
+  }
+};
 
 // Create Portfolio (Admin assigning to Client)
 exports.createPortfolio = async (req, res) => {
@@ -73,12 +90,20 @@ exports.getPortfolios = async (req, res) => {
 exports.getPortfolioBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+    const { Portfolio, PortfolioSection, User } = require("../models"); // Ensure User is loaded 
+    
     const portfolio = await Portfolio.findOne({
       where: { slug },
     });
 
     if (!portfolio)
       return res.status(404).json({ message: "Portfolio not found" });
+
+    // Check if user is active
+    const user = await User.findByPk(portfolio.userId);
+    if (!user || !user.isActive) {
+      return res.status(403).json({ message: "This portfolio is currently inactive." });
+    }
 
     const sections = await PortfolioSection.findAll({
       where: { portfolioId: portfolio.id },
@@ -96,24 +121,6 @@ exports.updatePortfolio = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const {
-      primaryColor,
-      secondaryColor,
-      fontFamily,
-      templateId,
-      secondaryTextColor,
-      logoUrl,
-      logoPosition,
-      profession,
-      location,
-      email,
-      socialLinks,
-      courses,
-      projects,
-      experience,
-      skills,
-    } = req.body;
-
     const portfolio = await Portfolio.findByPk(id);
     if (!portfolio)
       return res.status(404).json({ message: "Portfolio not found" });
@@ -121,24 +128,47 @@ exports.updatePortfolio = async (req, res) => {
     if (portfolio.userId !== req.user.id && req.user.role !== "ADMIN")
       return res.status(403).json({ message: "Unauthorized" });
 
-    // El slug NO se puede cambiar después de creado
-    await portfolio.update({
-      primaryColor,
-      secondaryColor,
-      fontFamily,
-      templateId,
-      secondaryTextColor,
-      logoUrl,
-      logoPosition,
-      profession,
-      location,
-      email,
-      socialLinks,
-      courses,
-      projects,
-      experience,
-      skills,
+    const allowedFields = [
+      'primaryColor', 'secondaryColor', 'fontFamily', 'templateId',
+      'secondaryTextColor', 'logoUrl', 'logoPosition', 'profession',
+      'location', 'email', 'socialLinks', 'courses', 'projects',
+      'experience', 'skills'
+    ];
+
+    const updateData = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
     });
+
+    const logoUrl = updateData.logoUrl;
+    const projects = updateData.projects;
+
+    // collect new incoming URLs
+    const newUrls = [];
+    if (logoUrl) newUrls.push(logoUrl);
+    if (projects) {
+      projects.forEach(p => {
+        if (p.imageUrl) newUrls.push(p.imageUrl);
+      });
+    }
+
+    // delete old logo if changed
+    if (logoUrl !== undefined && portfolio.logoUrl && portfolio.logoUrl !== logoUrl) {
+      deleteUnusedImage(portfolio.logoUrl, newUrls);
+    }
+
+    // delete old project images if discarded
+    if (projects !== undefined && portfolio.projects) {
+      portfolio.projects.forEach(p => {
+        deleteUnusedImage(p.imageUrl, newUrls);
+      });
+    }
+
+    // El slug NO se puede cambiar después de creado
+    await portfolio.update(updateData);
+    
     res.json(portfolio);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -164,6 +194,13 @@ exports.saveSection = async (req, res) => {
       // update
       const section = await PortfolioSection.findByPk(id);
       if (section) {
+        if (type === 'hero' && section.content && section.content.avatarUrl) {
+          const newAvatarUrl = content?.avatarUrl;
+          if (section.content.avatarUrl !== newAvatarUrl) {
+            deleteUnusedImage(section.content.avatarUrl, [newAvatarUrl]);
+          }
+        }
+        
         await section.update({ type, content, order, isVisible });
         return res.json(section);
       }

@@ -54,6 +54,7 @@ exports.updateClient = async (req, res) => {
 
     if (name) user.name = name;
     if (email) user.email = email;
+    if (req.body.isActive !== undefined) user.isActive = req.body.isActive;
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       user.password_hash = await bcrypt.hash(req.body.password, salt);
