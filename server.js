@@ -27,7 +27,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/portfolios', portfolioRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'API is running' });
+  res.status(200).json({ status: 'OK', message: 'API corriendo' });
 });
 
 // Start Server & Connect to DB
@@ -35,11 +35,11 @@ const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()
   .then(() => {
-    console.log('Database connection has been established successfully.');
+    console.log('Conexión a la base de datos exitosa.');
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Servidor corriendo en el puerto ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('Unable to connect to the database:', err);
+    console.error('Error al conectar a la base de datos:', err);
   });
