@@ -6,7 +6,7 @@ const authMiddleware = (req, res, next) => {
   if (!token) {
     return res
       .status(401)
-      .json({ message: "Sin token, autorización denegada" });
+      .json({ message: "No se proporcionó token de autenticación" });
   }
 
   try {
@@ -25,9 +25,7 @@ const adminMiddleware = (req, res, next) => {
   if (req.user && req.user.role === "ADMIN") {
     next();
   } else {
-    res
-      .status(403)
-      .json({ message: "Acceso denegado, solo para administradores" });
+    res.status(403).json({ message: "No eres digno de ser administrador" });
   }
 };
 

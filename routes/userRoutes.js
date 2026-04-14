@@ -1,5 +1,5 @@
 const express = require('express');
-const { createClient, getClients, getMe, updateClient } = require('../controllers/userController');
+const { createClient, getClients, getMe, updateClient, deleteClient } = require('../controllers/userController');
 const { authMiddleware, adminMiddleware } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.post('/', authMiddleware, adminMiddleware, createClient);
 
 // Update client name/email (Admin only)
 router.put('/:id', authMiddleware, adminMiddleware, updateClient);
+
+// Delete client (Admin only)
+router.delete('/:id', authMiddleware, adminMiddleware, deleteClient);
 
 module.exports = router;
