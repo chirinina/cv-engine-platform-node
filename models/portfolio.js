@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       projects: DataTypes.JSON, // [{ name, description, link, tools, images }]
       experience: DataTypes.JSON, // [{ company, role, period, description, tools }]
       skills: DataTypes.JSON, // [{ name, level }]
+      hobbies: DataTypes.JSON, // [{ name, link, imageUrl, icon }]
     },
     {
       sequelize,

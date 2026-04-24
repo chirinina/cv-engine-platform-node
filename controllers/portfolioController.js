@@ -38,6 +38,7 @@ exports.createPortfolio = async (req, res) => {
       projects,
       experience,
       skills,
+      hobbies,
     } = req.body;
 
     // Check if slug is taken
@@ -63,6 +64,7 @@ exports.createPortfolio = async (req, res) => {
       projects: projects || [],
       experience: experience || [],
       skills: skills || [],
+      hobbies: hobbies || [],
     });
 
     res.status(201).json(portfolio);
@@ -135,7 +137,7 @@ exports.updatePortfolio = async (req, res) => {
       'primaryColor', 'secondaryColor', 'fontFamily', 'templateId',
       'secondaryTextColor', 'logoUrl', 'logoPosition', 'profession',
       'location', 'email', 'socialLinks', 'courses', 'projects',
-      'experience', 'skills'
+      'experience', 'skills', 'hobbies'
     ];
 
     const updateData = {};

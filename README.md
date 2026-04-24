@@ -25,6 +25,10 @@ npx sequelize-cli db:migrate
 
 http://localhost:5000/api/auth/setup
 
+
+npx sequelize-cli db:drop
+npx sequelize-cli db:create
+npx sequelize-cli db:migrate
 ```
 {
   "name": "Aministrador",

@@ -16,6 +16,8 @@ const {
 } = require("../middlewares/authMiddleware");
 const multer = require("multer");
 
+const { getLinkPreviewData } = require("../controllers/utilsController");
+
 const router = express.Router();
 
 const fs = require("fs");
@@ -46,6 +48,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/", authMiddleware, getPortfolios);
+
+// Utility for link preview (before /:id routes so it doesn't get caught by dynamic params)
+router.get("/link-preview", authMiddleware, getLinkPreviewData);
 
 // Admin create a portfolio assignment
 router.post("/", authMiddleware, adminMiddleware, createPortfolio);
