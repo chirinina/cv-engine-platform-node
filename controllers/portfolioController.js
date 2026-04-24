@@ -110,7 +110,10 @@ exports.getPortfolioBySlug = async (req, res) => {
       order: [["order", "ASC"]],
     });
 
-    res.json({ portfolio, sections });
+    const portfolioData = portfolio.toJSON();
+    portfolioData.user = { name: user.name };
+
+    res.json({ portfolio: portfolioData, sections });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
