@@ -26,15 +26,16 @@ npx sequelize-cli db:migrate
 http://localhost:5000/api/auth/setup
 
 
+```bash
 npx sequelize-cli db:drop
 npx sequelize-cli db:create
 npx sequelize-cli db:migrate
 ```
+```json
 {
   "name": "Aministrador",
-  "username": "admin123",
-  "password": "admin123",
-  "email": "admin@gmail.com"
+  "email": "admin@gmail.com",
+  "password": "admin123"
 }
 ```
 

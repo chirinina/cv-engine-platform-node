@@ -43,8 +43,7 @@ exports.setupAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const existing = await User.findOne({ where: { email } });
-    if (existing)
-      return res.status(400).json({ message: "User already exists" });
+    if (existing) return res.status(400).json({ message: "Usuario ya existe" });
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
@@ -56,7 +55,9 @@ exports.setupAdmin = async (req, res) => {
       role: "ADMIN",
     });
 
-    res.status(201).json({ message: "Admin created successfully", admin });
+    res
+      .status(201)
+      .json({ message: "Administrador creado exitosamente", admin });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
